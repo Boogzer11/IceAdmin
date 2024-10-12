@@ -2171,33 +2171,86 @@ cmd.add({"accountage","accage"},{"accountage <player> (accage)","Tells the accou
 	DoNotif(accountage)
 end)
 
-cmd.add({"handlekill","hkill"}, {"handlekill <player> (hkill)"}, function(...)
-    local args = {...}
-    local speaker = im_redv1  -- Using the player 'im_redv1'
-    
-    if not firetouchinterest then return end  -- Check if exploit supports firetouchinterest
+cmd.add({"handlekill"}, {"handlekill <player>", "Kill the given player using the handlekill method"}, function(plr)
+    local player = game:GetService("Players").LocalPlayer
+    local Targets = {plr}
+    local Players = game:GetService("Players")
+    local Player = Players.LocalPlayer
+    local AllBool = false
 
-    local Tool = speaker.Character:FindFirstChildWhichIsA("Tool")
-    local Handle = Tool and Tool:FindFirstChild("Handle")
-
-    if not Tool or not Handle then return end  -- Ensure a valid tool and handle are present
-
-    local targetPlayer = getPlr(args[1])
-    if targetPlayer then
-        task.spawn(function()
-            while Tool and speaker.Character and targetPlayer.Character and Tool.Parent == speaker.Character do
-                local Human = targetPlayer.Character:FindFirstChildWhichIsA("Humanoid")
-                if not Human or Human.Health <= 0 then
-                    break
-                end
-                for _, part in ipairs(targetPlayer.Character:GetChildren()) do
-                    if part:IsA("BasePart") then
-                        firetouchinterest(Handle, part, 1)
-                        firetouchinterest(Handle, part, 0)
+    -- Function to find a player based on the provided name
+    local GetPlayer = function(Name)
+        Name = Name:lower()
+        if Name == "all" or Name == "others" then
+            AllBool = true
+            return
+        elseif Name == "random" then
+            local GetPlayers = Players:GetPlayers()
+            if table.find(GetPlayers, Player) then 
+                table.remove(GetPlayers, table.find(GetPlayers, Player)) 
+            end
+            return GetPlayers[math.random(#GetPlayers)]
+        else
+            for _, x in next, Players:GetPlayers() do
+                if x ~= Player then
+                    if x.Name:lower():match("^" .. Name) or x.DisplayName:lower():match("^" .. Name) then
+                        return x
                     end
                 end
             end
-        end)
+        end
+    end
+
+    -- The actual handlekill functionality
+    local HandleKill = function(TargetPlayer)
+        local Character = Player.Character
+        local Humanoid = Character and Character:FindFirstChildOfClass("Humanoid")
+        local RootPart = Humanoid and Humanoid.RootPart
+
+        local TCharacter = TargetPlayer.Character
+        local THumanoid = TCharacter and TCharacter:FindFirstChildOfClass("Humanoid")
+        local Handle
+
+        -- Find the handle in the target's accessories
+        for _, Accessory in pairs(TCharacter:GetChildren()) do
+            if Accessory:IsA("Accessory") and Accessory:FindFirstChild("Handle") then
+                Handle = Accessory.Handle
+                break
+            end
+        end
+
+        -- If Handle exists, simulate touch interest
+        if Handle then
+            local touchInterest = Handle:FindFirstChildWhichIsA("TouchTransmitter")
+            if touchInterest then
+                firetouchinterest(Handle, TargetPlayer.Character.Head, 0) -- Trigger the kill action
+                firetouchinterest(Handle, TargetPlayer.Character.Head, 1) -- End touch action
+            end
+        end
+    end
+
+    -- Check if we're targeting all players
+    if Targets[1] then
+        for _, x in next, Targets do 
+            GetPlayer(x) 
+        end
+    else 
+        return 
+    end
+
+    -- Handle all players case
+    if AllBool then
+        for _, x in next, Players:GetPlayers() do
+            HandleKill(x)
+        end
+    end
+
+    -- Handle individual players
+    for _, x in next, Targets do
+        local TargetPlayer = GetPlayer(x)
+        if TargetPlayer and TargetPlayer ~= Player then
+            HandleKill(TargetPlayer)
+        end
     end
 end)
 
