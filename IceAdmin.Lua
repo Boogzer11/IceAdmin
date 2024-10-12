@@ -2171,18 +2171,16 @@ cmd.add({"accountage","accage"},{"accountage <player> (accage)","Tells the accou
 	DoNotif(accountage)
 end)
 
-cmd.add({"handlekill","hkill"},{"handlekill <player> (hkill)", "Use a tool to kill a player by touching them"}, function(...)
+cmd.add({"handlekill","hkill"}, {"handlekill <player> (hkill)"}, function(...)
     local args = {...}
-    local speaker = im_redv1 -- Assuming 'im_redv1' is the specific player to use for the command
-    if not firetouchinterest then
-        return DoNotif('Incompatible Exploit: Your exploit does not support this command (missing firetouchinterest)')
-    end
+    local speaker = im_redv1  -- Using the player 'im_redv1'
+    
+    if not firetouchinterest then return end  -- Check if exploit supports firetouchinterest
 
     local Tool = speaker.Character:FindFirstChildWhichIsA("Tool")
     local Handle = Tool and Tool:FindFirstChild("Handle")
-    if not Tool or not Handle then
-        return DoNotif("Handle Kill: You need to hold a Tool that does damage on touch (e.g., a Sword).")
-    end
+
+    if not Tool or not Handle then return end  -- Ensure a valid tool and handle are present
 
     local targetPlayer = getPlr(args[1])
     if targetPlayer then
@@ -2199,10 +2197,7 @@ cmd.add({"handlekill","hkill"},{"handlekill <player> (hkill)", "Use a tool to ki
                     end
                 end
             end
-            DoNotif("Handle Kill Stopped: " .. targetPlayer.Name .. " died/left or you unequipped the tool!")
         end)
-    else
-        DoNotif("Handle Kill: Player not found.")
     end
 end)
 
