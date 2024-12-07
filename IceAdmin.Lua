@@ -491,7 +491,7 @@ t.SelectTerrainRegion = function(regionToSelect, color, selectEmptyCells, select
 	if selectionParent then
 		selectionContainer.Parent = selectionParent
 	else
-		selectionContainer.Parent = game:GetService("Workspace")
+		selectionContainer.Parent = game:GetService("game.Players.LocalPlayer.Character")
 	end
 	local updateSelection = nil -- function we return to allow user to update selection
 	local currentKeepAliveTag = nil -- a tag that determines whether adorns should be destroyed
